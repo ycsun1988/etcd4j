@@ -7,15 +7,13 @@ import java.io.Serializable;
  *         email: zhimeng@douyu.tv
  *         weichat: mengzhi825
  *         date: 2017/6/5.
+ *         EtcdResult对应Etcd服务器返回的成功的消息，而Etcd返回的错误消息会映射成Exception抛出
  */
 public class EtcdResult implements Serializable {
 
     private String action;
     private EtcdNode node;
     private EtcdNode prevNode;
-    private int errorCode;
-    private String message;
-    private String cause;
     private int index;
 
     public String getAction() {
@@ -42,30 +40,6 @@ public class EtcdResult implements Serializable {
         this.prevNode = prevNode;
     }
 
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(int errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getCause() {
-        return cause;
-    }
-
-    public void setCause(String cause) {
-        this.cause = cause;
-    }
-
     public int getIndex() {
         return index;
     }
@@ -80,9 +54,6 @@ public class EtcdResult implements Serializable {
                 "action='" + action + '\'' +
                 ", node=" + node +
                 ", prevNode=" + prevNode +
-                ", errorCode=" + errorCode +
-                ", message='" + message + '\'' +
-                ", cause='" + cause + '\'' +
                 ", index=" + index +
                 '}';
     }
