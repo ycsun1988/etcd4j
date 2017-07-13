@@ -1,4 +1,4 @@
-package com.zhi.etcd4j;
+package com.zhi.etcd4j.core;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public class OkHttp3CallbackAdapter implements Callback {
 
     private static final Logger LOG = LoggerFactory.getLogger(OkHttp3CallbackAdapter.class);
     /**
-     * EtcdClient callback which used for developers.
+     * DefaultEtcdClient callback which used for developers.
      */
     private EtcdCallback etcdCallback;
     /**

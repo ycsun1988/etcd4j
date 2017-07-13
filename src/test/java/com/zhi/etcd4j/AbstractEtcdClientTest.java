@@ -1,10 +1,15 @@
 package com.zhi.etcd4j;
 
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.zhi.etcd4j.core.DefaultEtcdClient;
+import com.zhi.etcd4j.core.EtcdCallback;
+import com.zhi.etcd4j.core.EtcdNode;
+import com.zhi.etcd4j.core.EtcdResult;
 import com.zhi.etcd4j.exception.CompareFailedException;
 import com.zhi.etcd4j.exception.DirectoryNotEmptyException;
 import com.zhi.etcd4j.exception.EtcdException;
@@ -26,15 +31,16 @@ import org.slf4j.LoggerFactory;
  *         weichat: mengzhi825
  *         date: 2017/6/9.
  */
-public class EtcdClientTest {
+public abstract class AbstractEtcdClientTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EtcdClientTest.class);
-    private EtcdClient etcdClient;
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractEtcdClientTest.class);
     private String testDir;
+    private EtcdClient etcdClient = getEtcdClient();
+
+    protected abstract EtcdClient getEtcdClient();
 
     @Before
     public void setUp() {
-        etcdClient = new EtcdClient("http://192.168.64.132");
         testDir = "/" + UUID.randomUUID().toString();
         etcdClient.createDir(testDir);
     }
@@ -46,18 +52,18 @@ public class EtcdClientTest {
 
     @Test
     public void testCreateEtcdClient() {
-        //test EtcdClient(uri)
+        //test DefaultEtcdClient(uri)
         String ip = "192.168.64.132";
-        new EtcdClient(ip + ":3379");
-        new EtcdClient(ip);
-        new EtcdClient("http://" + ip);
-        new EtcdClient("http://" + ip + ":3379");
+        new DefaultEtcdClient(ip + ":3379");
+        new DefaultEtcdClient(ip);
+        new DefaultEtcdClient("http://" + ip);
+        new DefaultEtcdClient("http://" + ip + ":3379");
         try {
-            new EtcdClient("");
+            new DefaultEtcdClient("");
             Assert.fail();
         } catch (EtcdException e) {
         }
-        //test EtcdClient(uri, port)
+        //test DefaultEtcdClient(uri, port)
     }
 
     @Test
@@ -83,11 +89,10 @@ public class EtcdClientTest {
         etcdClient.set(key, "hello");
         EtcdResult result = etcdClient.get(key);
         //just get .
-        result.getIndex();
         EtcdNode node = result.getNode();
         node.getKey();
         node.getValue();
-        node.getCreateIndex();
+        node.getCreatedIndex();
         node.getExpiration();
         node.getNodes();
         node.getTtl();
@@ -332,14 +337,14 @@ public class EtcdClientTest {
         String afterValue = "after value";
         etcdClient.set(key, value);
         Map<String, String> conditions = new HashMap<String, String>();
-        conditions.put(EtcdClient.KEY_OF_PREVEXIST, String.valueOf(false));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVEXIST, String.valueOf(false));
         try {
             etcdClient.cas(key, afterValue, conditions);
             Assert.fail();
         } catch (KeyAlreadyExistsException e) {
         }
         conditions.clear();
-        conditions.put(EtcdClient.KEY_OF_PREVEXIST, String.valueOf(true));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVEXIST, String.valueOf(true));
         etcdClient.cas(key, afterValue, conditions);
         EtcdResult result = etcdClient.get(key);
         Assert.assertTrue(result.getNode().getValue().equals(afterValue));
@@ -352,11 +357,11 @@ public class EtcdClientTest {
         String value = "hello, world";
         //set key
         EtcdResult result = etcdClient.set(key, value);
-        int index = result.getIndex();
+        long index = result.getNode().getModifiedIndex();
         String afterValue = "after value222";
         Map<String, String> conditions = new HashMap<String, String>();
         //test cas error
-        conditions.put(EtcdClient.KEY_OF_PREVINDEX, String.valueOf(index + 1));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVINDEX, String.valueOf(index + 1));
         try {
             etcdClient.cas(key, afterValue, conditions);
             Assert.fail();
@@ -365,7 +370,7 @@ public class EtcdClientTest {
 
         //test cas success.
         conditions.clear();
-        conditions.put(EtcdClient.KEY_OF_PREVINDEX, String.valueOf(index));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVINDEX, String.valueOf(index));
         etcdClient.cas(key, afterValue, conditions);
         result = etcdClient.get(key);
         Assert.assertTrue(result.getNode().getValue().equals(afterValue));
@@ -380,7 +385,7 @@ public class EtcdClientTest {
         String afterValue = "after value";
         etcdClient.set(key, value);
         Map<String, String> conditions = new HashMap<String, String>();
-        conditions.put(EtcdClient.KEY_OF_PREVVALUE, "not this value");
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVVALUE, "not this value");
         try {
             etcdClient.cas(key, afterValue, conditions);
             Assert.fail();
@@ -389,7 +394,7 @@ public class EtcdClientTest {
 
         //test success.
         conditions.clear();
-        conditions.put(EtcdClient.KEY_OF_PREVVALUE, value);
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVVALUE, value);
         //实际上从cas的返回值就可以知道cas操作是否执行成功。
         etcdClient.cas(key, afterValue, conditions);
         EtcdResult result = etcdClient.get(key);
@@ -404,7 +409,7 @@ public class EtcdClientTest {
         etcdClient.createDir(key);
         //test cas a empty dir
         Map<String, String> conditions = new HashMap<String, String>();
-        conditions.put(EtcdClient.KEY_OF_PREVEXIST, String.valueOf(true));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVEXIST, String.valueOf(true));
         try {
             etcdClient.cas(key, "blabla", conditions);
             Assert.fail();
@@ -427,7 +432,7 @@ public class EtcdClientTest {
         String value = "hello, world";
         etcdClient.set(key, value);
         Map<String, String> conditions = new HashMap<String, String>();
-        conditions.put(EtcdClient.KEY_OF_PREVEXIST, String.valueOf(false));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVEXIST, String.valueOf(false));
         etcdClient.cad(key, conditions);
         try {
             etcdClient.get(key);
@@ -445,7 +450,7 @@ public class EtcdClientTest {
         String value = "hello, world";
         etcdClient.set(key, value);
         Map<String, String> conditions = new HashMap<String, String>();
-        conditions.put(EtcdClient.KEY_OF_PREVVALUE, "afafafdaf");
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVVALUE, "afafafdaf");
         try {
             etcdClient.cad(key, conditions);
             Assert.fail();
@@ -454,7 +459,7 @@ public class EtcdClientTest {
 
         //test cad with prevValue condition, which prevValue is equal with actually value.
         conditions.clear();
-        conditions.put(EtcdClient.KEY_OF_PREVVALUE, value);
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVVALUE, value);
         etcdClient.cad(key, conditions);
         try {
             etcdClient.get(key);
@@ -470,10 +475,10 @@ public class EtcdClientTest {
         String key = testDir + "/key01";
         String value = "hello, world";
         EtcdResult result = etcdClient.set(key, value);
-        int index = result.getIndex();
+        long index = result.getNode().getModifiedIndex();
         Map<String, String> conditions = new HashMap<String, String>();
         //test index not a number.
-        conditions.put(EtcdClient.KEY_OF_PREVINDEX, "abcdddd");
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVINDEX, "abcdddd");
         try {
             etcdClient.cad(key, conditions);
             Assert.fail();
@@ -481,7 +486,7 @@ public class EtcdClientTest {
         }
         //test index not the actual value.
         conditions.clear();
-        conditions.put(EtcdClient.KEY_OF_PREVINDEX, String.valueOf(index + 1));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVINDEX, String.valueOf(index + 1));
         try {
             etcdClient.cad(key, conditions);
             Assert.fail();
@@ -490,7 +495,7 @@ public class EtcdClientTest {
 
         //test cad with prevIndex condition, which prevIndex is equal with actual value.
         conditions.clear();
-        conditions.put(EtcdClient.KEY_OF_PREVINDEX, String.valueOf(index));
+        conditions.put(DefaultEtcdClient.KEY_OF_PREVINDEX, String.valueOf(index));
         etcdClient.cad(key, conditions);
         try {
             etcdClient.get(key);
@@ -520,6 +525,7 @@ public class EtcdClientTest {
                 //对应的时间
 //                Assert.assertTrue(result.getNode().getValue().equals(afterValue));
                 Assert.assertTrue(result.getNode().getValue().equals(afterValue));
+
             }
         });
         //start modify key thread.
@@ -533,6 +539,50 @@ public class EtcdClientTest {
         //note: must sleep to avoid watch the tearDown event.
         sleep(TimeUnit.SECONDS, 3);
     }
+
+
+    //recursive watch.
+    @Test
+    public void testWatch4() {
+        final String key = testDir + "/key02";
+        LOG.debug("test dir is [{}].", testDir);
+        String value = "hello, world2";
+        final String afterValue = "Rocket boy.2";
+        etcdClient.set(key, value);
+
+        //test re watch on the key
+        etcdClient.watch(key, new EtcdCallback() {
+            public void onFailure(EtcdException e) {
+                LOG.error("Watch on key [{}] error.", key, e);
+                //re watch on the key
+                etcdClient.watch(key, this);
+            }
+
+            public void onResponse(EtcdResult result) {
+                LOG.info("Response str: {}", result);
+                //re watch on the key.
+                etcdClient.watch(key, this);
+
+            }
+        });
+        //start modify key thread.
+        Thread modifyKeyThread = new Thread(new Runnable() {
+            public void run() {
+                int i = 3;
+                while (i > 0) {
+                    i--;
+                    //update key's value three times.
+                    sleep(TimeUnit.SECONDS, 2);
+                    etcdClient.set(key, "after value " + i);
+
+                }
+            }
+        });
+        modifyKeyThread.start();
+        //note: must sleep to avoid watch the tearDown event.
+        sleep(TimeUnit.SECONDS, 10);
+    }
+
 
     //test watch on a dir key with recursive parameter is false
     //note: watch api return only one change after the time point watched on a key.
@@ -608,7 +658,7 @@ public class EtcdClientTest {
         final String afterValue = "after testWatch04";
         EtcdResult result = etcdClient.set(key, value);
         //watch first change of key.
-        etcdClient.watch(key, result.getIndex(), new EtcdCallback() {
+        etcdClient.watch(key, result.getNode().getModifiedIndex() + 1, new EtcdCallback() {
             public void onFailure(EtcdException e) {
                 LOG.error("Watch on key [{}] error.", key, e);
             }
@@ -630,7 +680,7 @@ public class EtcdClientTest {
         });
         secondModifyKeyThread.start();
         //watch second change of key
-        etcdClient.watch(key, result.getIndex(), new EtcdCallback() {
+        etcdClient.watch(key, result.getNode().getModifiedIndex() + 1, new EtcdCallback() {
             public void onFailure(EtcdException e) {
                 LOG.error("Watch on key [{}] error.", key, e);
             }
@@ -641,18 +691,12 @@ public class EtcdClientTest {
         });
         sleep(TimeUnit.SECONDS, 3);
     }
-//    //test watch a dir key with specific wait index
-//    // no need test.
-//    @Test
-//    public void testWatch05() {
-//
-//    }
 
     //test EtcdNode set get, just for test coverage.
     @Test
     public void testEtcdNode() {
         EtcdNode etcdNode = new EtcdNode();
-        etcdNode.setCreateIndex(0L);
+        etcdNode.setCreatedIndex(0L);
         etcdNode.setDir(true);
         etcdNode.setExpiration("2017-06-17");
         etcdNode.setKey("/key01");

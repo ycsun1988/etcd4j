@@ -4,7 +4,7 @@
 
     <groupId>com.zhi.etcd4j</groupId>
     <artifactId>etcd4j</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>etcd4j</name>
@@ -41,28 +41,74 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--removed when release-->
+        <!--test scope-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j2.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j2.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j2.version}</version>
+            <scope>test</scope>
         </dependency>
-        <!--end removed.-->
+        <!--end test scope-->
 
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>douyu-repo</id>
+            <name>douyu Repository</name>
+            <url>http://10.1.100.11:8082/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Internal Releases</name>
+            <url>http://10.1.100.11:8082/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Internal snapshots</name>
+            <url>http://10.1.100.11:8082/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>douyu-repo</id>
+            <name>douyu Repository</name>
+            <url>http://10.1.100.11:8082/nexus/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <!--这里编译版本固定为1.7，避免由于部署环境的jdk 较低而造成的宿主应用启动失败的问题-->
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <compilerArguments> <!-- 解决SUN API 过期提示 -->
+                        <verbose/>
+                        <bootclasspath>${java.home}/lib/rt.jar</bootclasspath>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

@@ -1,4 +1,4 @@
-package com.zhi.etcd4j;
+package com.zhi.etcd4j.core;
 
 import java.io.Serializable;
 

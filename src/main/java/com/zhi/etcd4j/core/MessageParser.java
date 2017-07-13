@@ -1,4 +1,4 @@
-package com.zhi.etcd4j;
+package com.zhi.etcd4j.core;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -30,12 +30,12 @@ public class MessageParser {
      * @param bodyStr    http response body string.
      * @return the EtcdResult instance.
      */
-    public com.zhi.etcd4j.EtcdResult parseResponse(int statusCode, String bodyStr) {
+    public com.zhi.etcd4j.core.EtcdResult parseResponse(int statusCode, String bodyStr) {
         EtcdResult tempResult;
         try {
             tempResult = gson.fromJson(bodyStr, EtcdResult.class);
         } catch (JsonParseException e) {
-            LOG.error("Parse bodyStr [{}] error.", bodyStr, e);
+            LOG.debug("Parse bodyStr [{}] error.", bodyStr, e);
             throw new EtcdException("Parse bodyStr [" + bodyStr + "] error.", e);
         }
         checkThrowError(tempResult);
@@ -50,9 +50,9 @@ public class MessageParser {
         }
     }
 
-    private com.zhi.etcd4j.EtcdResult buildEtcdResult(EtcdResult etcdResult) {
+    private com.zhi.etcd4j.core.EtcdResult buildEtcdResult(EtcdResult etcdResult) {
         //program go here means Etcd's response has no error.
-        com.zhi.etcd4j.EtcdResult rtResult = new com.zhi.etcd4j.EtcdResult();
+        com.zhi.etcd4j.core.EtcdResult rtResult = new com.zhi.etcd4j.core.EtcdResult();
         rtResult.setAction(etcdResult.action);
         rtResult.setIndex(etcdResult.index);
         rtResult.setNode(etcdResult.node);

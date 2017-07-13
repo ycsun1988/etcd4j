@@ -1,4 +1,4 @@
-package com.zhi.etcd4j;
+package com.zhi.etcd4j.core;
 
 import java.io.Serializable;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 public class EtcdNode implements Serializable {
 
     private String key;
-    private long createIndex;
+    private long createdIndex;
     private long modifiedIndex;
     private String value;
     private String expiration;
@@ -28,12 +28,12 @@ public class EtcdNode implements Serializable {
         this.key = key;
     }
 
-    public long getCreateIndex() {
-        return createIndex;
+    public long getCreatedIndex() {
+        return createdIndex;
     }
 
-    public void setCreateIndex(long createIndex) {
-        this.createIndex = createIndex;
+    public void setCreatedIndex(long createdIndex) {
+        this.createdIndex = createdIndex;
     }
 
     public long getModifiedIndex() {
@@ -88,7 +88,7 @@ public class EtcdNode implements Serializable {
     public String toString() {
         return "EtcdNode{" +
                 "key='" + key + '\'' +
-                ", createIndex=" + createIndex +
+                ", createdIndex=" + createdIndex +
                 ", modifiedIndex=" + modifiedIndex +
                 ", value='" + value + '\'' +
                 ", expiration='" + expiration + '\'' +
