@@ -445,14 +445,14 @@ public class DefaultEtcdClient implements EtcdClient {
         try {
             response = HTTP_CLIENT.newCall(request).execute();
         } catch (IOException e) {
-            LOG.error("Execute http request error, please check network connection.", e);
+            LOG.debug("Execute http request error, please check network connection.", e);
             throw new ConnectException("Execute http request error, please check network connection.", e);
         }
         String bodyStr;
         try {
             bodyStr = response.body().string();
         } catch (IOException e) {
-            LOG.error("Read http response body error.", e);
+            LOG.debug("Read http response body error.", e);
             throw new EtcdException("Read http response body error.", e);
         }
         int statusCode = response.code();

@@ -34,7 +34,7 @@ public class OkHttp3CallbackAdapter implements Callback {
     }
 
     public void onFailure(Call call, IOException e) {
-        LOG.error("Execute http request error, please check network connection.", e);
+        LOG.debug("Execute http request error, please check network connection.", e);
         etcdCallback.onFailure(new EtcdException("Execute http request error, please check network connection.", e));
     }
 
@@ -43,7 +43,7 @@ public class OkHttp3CallbackAdapter implements Callback {
         try {
             bodyStr = response.body().string();
         } catch (IOException e) {
-            LOG.error("Read http response body error.", e);
+            LOG.debug("Read http response body error.", e);
             etcdCallback.onFailure(new EtcdException("Read http response body error.", e));
             return;
         }
@@ -54,7 +54,7 @@ public class OkHttp3CallbackAdapter implements Callback {
             etcdResult = messageParser.parseResponse(statusCode, bodyStr);
             etcdCallback.onResponse(etcdResult);
         } catch (Exception e) {
-            LOG.error("Parse response body [{}] error.", bodyStr, e);
+            LOG.debug("Parse response body [{}] error.", bodyStr, e);
             etcdCallback.onFailure(new EtcdException("", e));
         }
     }
