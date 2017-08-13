@@ -1,7 +1,7 @@
 Etcd4j
 ====
 
-**Latest release: [1.1.1]()**<br/>
+**Latest release: 1.1.1**<br/>
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Etcd4j是一款Etcd（分布式一致性的KV存储系统）java版本的客户端，目的是方便开发人通过Java代码与Etcd进行交互。
