@@ -83,18 +83,4 @@ public class EtcdNode implements Serializable {
     public void setNodes(List<EtcdNode> nodes) {
         this.nodes = nodes;
     }
-
-    @Override
-    public String toString() {
-        return "EtcdNode{" +
-                "key='" + key + '\'' +
-                ", createdIndex=" + createdIndex +
-                ", modifiedIndex=" + modifiedIndex +
-                ", value='" + value + '\'' +
-                ", expiration='" + expiration + '\'' +
-                ", ttl=" + ttl +
-                ", dir=" + dir +
-                ", nodes=" + nodes +
-                '}';
-    }
 }

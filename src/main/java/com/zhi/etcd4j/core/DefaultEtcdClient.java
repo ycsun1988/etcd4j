@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.zhi.etcd4j.EtcdClient;
 import com.zhi.etcd4j.exception.ConnectException;
 import com.zhi.etcd4j.exception.EtcdException;
@@ -32,8 +30,7 @@ public class DefaultEtcdClient implements EtcdClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultEtcdClient.class);
     private static final OkHttpClient HTTP_CLIENT = OkHttpUtil.buildHttpClient();
-    private static final Gson GSON = new GsonBuilder().create();
-    private static final MessageParser MESSAGE_PARSER = new MessageParser(GSON);
+    private static final MessageParser MESSAGE_PARSER = new MessageParser();
     private static final String URI_SUFFIX = "/v2/keys";
     private static final int DEFAULT_PORT = 3379;
     private static final String HTTP_SCHEME = "http://";

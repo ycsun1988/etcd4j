@@ -1,7 +1,7 @@
 package com.zhi.etcd4j.core;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.zhi.etcd4j.exception.EtcdException;
 import com.zhi.etcd4j.exception.EtcdExceptionUtil;
 import org.slf4j.Logger;
@@ -17,10 +17,8 @@ import org.slf4j.LoggerFactory;
 public class MessageParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageParser.class);
-    private Gson gson;
 
-    public MessageParser(Gson gson) {
-        this.gson = gson;
+    public MessageParser() {
     }
 
     /**
@@ -33,8 +31,8 @@ public class MessageParser {
     public com.zhi.etcd4j.core.EtcdResult parseResponse(int statusCode, String bodyStr) {
         EtcdResult tempResult;
         try {
-            tempResult = gson.fromJson(bodyStr, EtcdResult.class);
-        } catch (JsonParseException e) {
+            tempResult = JSON.parseObject(bodyStr, EtcdResult.class);
+        } catch (JSONException e) {
             LOG.debug("Parse bodyStr [{}] error.", bodyStr, e);
             throw new EtcdException("Parse bodyStr [" + bodyStr + "] error.", e);
         }
@@ -46,7 +44,7 @@ public class MessageParser {
         int errorCode = etcdResult.errorCode;
         //must throw error.
         if (errorCode > 0) {
-            throw EtcdExceptionUtil.newSpecificException(errorCode, gson.toJson(etcdResult));
+            throw EtcdExceptionUtil.newSpecificException(errorCode, JSON.toJSONString(etcdResult));
         }
     }
 
@@ -54,7 +52,6 @@ public class MessageParser {
         //program go here means Etcd's response has no error.
         com.zhi.etcd4j.core.EtcdResult rtResult = new com.zhi.etcd4j.core.EtcdResult();
         rtResult.setAction(etcdResult.action);
-        rtResult.setIndex(etcdResult.index);
         rtResult.setNode(etcdResult.node);
         rtResult.setPrevNode(etcdResult.prevNode);
         return rtResult;
@@ -64,6 +61,7 @@ public class MessageParser {
      * 仅在MessageParser内部使用!
      */
     private static class EtcdResult {
+
         //General values
         private String action;
         private EtcdNode node;
@@ -74,6 +72,62 @@ public class MessageParser {
         private String message;
         private String cause;
         private int index;
+
+        public String getAction() {
+            return action;
+        }
+
+        public void setAction(String action) {
+            this.action = action;
+        }
+
+        public EtcdNode getNode() {
+            return node;
+        }
+
+        public void setNode(EtcdNode node) {
+            this.node = node;
+        }
+
+        public EtcdNode getPrevNode() {
+            return prevNode;
+        }
+
+        public void setPrevNode(EtcdNode prevNode) {
+            this.prevNode = prevNode;
+        }
+
+        public int getErrorCode() {
+            return errorCode;
+        }
+
+        public void setErrorCode(int errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public String getCause() {
+            return cause;
+        }
+
+        public void setCause(String cause) {
+            this.cause = cause;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
     }
 
 }

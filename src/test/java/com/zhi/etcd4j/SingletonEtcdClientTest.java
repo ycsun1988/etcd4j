@@ -13,6 +13,6 @@ public class SingletonEtcdClientTest extends AbstractEtcdClientTest {
 
     @Override
     protected EtcdClient getEtcdClient() {
-        return new DefaultEtcdClient("192.168.64.132:3379");
+        return new DefaultEtcdClient("10.18.3.27:3379");
     }
 }
